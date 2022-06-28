@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-movie-table
+      author: Daniil
+      changes:
+        - createTable:
+            tableName: movies
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: poster_path
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
