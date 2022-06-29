@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface MoviesRepository extends JpaRepository<Movie, Long> {
-    @Query(value = "select distinct movies.id, movies.title, movies.poster_path\n" +
+    @Query(value =  "select distinct movies.id, movies.title, movies.poster_path\n" +
                     "from movies\n" +
                     "left join favourites on movies.id = favourites.mov_id\n" +
                     "where favourites.usr_id != ?1\n" +
