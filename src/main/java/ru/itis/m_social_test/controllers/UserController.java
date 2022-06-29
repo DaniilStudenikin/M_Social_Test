@@ -30,7 +30,7 @@ public class UserController {
     public ResponseEntity<?> getInfo(@RequestHeader(name = "User-Id") Long id) {
         Optional<User> userFromDb = userService.getInfoAboutUser(id);
         if (userFromDb.isPresent())
-            return ResponseEntity.ok(userFromDb.get());
+            return ResponseEntity.ok(UserDto.from(userFromDb.get()));
         else
             return ResponseEntity.status(401).body("Пользователя с таким id не существует, пожалуйста пройдите регистрацию");
     }
@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "api/v1/users/delete")
-    public ResponseEntity<String> deleteUser(@RequestHeader(name = "User-Id") Long id){
+    public ResponseEntity<String> deleteUser(@RequestHeader(name = "User-Id") Long id) {
         return ResponseEntity.ok(userService.deleteUser(id));
     }
 

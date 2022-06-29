@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
+
 
 @Data
 @AllArgsConstructor
@@ -23,4 +25,7 @@ public class Movie {
 
     @Column
     private String poster_path;
+
+    @ManyToMany(mappedBy = "movieList")
+    private List<User> userList;
 }

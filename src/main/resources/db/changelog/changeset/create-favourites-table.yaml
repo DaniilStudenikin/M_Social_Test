@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-favourites-table
+      author: Daniil
+      changes:
+        - createTable:
+            tableName: favourites
+            columns:
+              - column:
+                  name: usr_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: users_id
+                    references: users
+              - column:
+                  name: mov_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: movies_id
+                    references: movies

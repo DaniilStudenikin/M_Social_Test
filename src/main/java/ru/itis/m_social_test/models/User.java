@@ -9,6 +9,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.List;
+
 
 @Data
 @AllArgsConstructor
@@ -29,10 +31,17 @@ public class User {
 
     @Column
     @NotBlank(message = "Поле username не может быть пустым")
-    @Pattern(regexp = "^[a-zA-Z]*$",message = "Username может быть только на латинском")
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "Username может быть только на латинском")
     private String username;
 
     @Column
     private String name;
 
+    @ManyToMany
+    @JoinTable(
+            name = "favourites",
+            joinColumns = @JoinColumn(name = "usr_id"),
+            inverseJoinColumns = @JoinColumn(name = "mov_id")
+    )
+    private List<Movie> movieList;
 }
