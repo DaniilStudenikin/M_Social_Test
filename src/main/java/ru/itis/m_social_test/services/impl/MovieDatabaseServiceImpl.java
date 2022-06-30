@@ -3,7 +3,10 @@ package ru.itis.m_social_test.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,17 +15,20 @@ import ru.itis.m_social_test.repositories.MoviesRepository;
 import ru.itis.m_social_test.services.MovieDatabaseService;
 
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieDatabaseServiceImpl implements MovieDatabaseService {
+    private final Logger logger = LoggerFactory.getLogger(MovieDatabaseServiceImpl.class);
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Value("${movie.database.api-key}")
+    private String apiKey;
 
     @Autowired
     private MoviesRepository moviesRepository;
@@ -30,20 +36,18 @@ public class MovieDatabaseServiceImpl implements MovieDatabaseService {
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 3)
     @Override
     public void parseMovies() {
-        System.out.println("Start parsing");
+        logger.info("Start parsing movies.");
 
-        Map<String, Movie> movies = new HashMap<>();
-        List<Movie> moviesFromDb = moviesRepository.findAll();
+        Map<String, Movie> movies = moviesRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(Movie::getTitle, Function.identity()));
 
-        for (Movie movie : moviesFromDb) {
-            movies.put(movie.getTitle(), movie);
-        }
 
         for (int i = 1; i < 6; i++) {
-            String url = "https://api.themoviedb.org/3/discover/movie?api_key=45c9ff0594bfa02380ed8d472c08b675&page=" + i;
+            String url = "https://api.themoviedb.org/3/discover/movie?api_key=" + apiKey + "&page=" + i;
             try {
-                JsonNode json = objectMapper.readTree(restTemplate.getForObject(url, String.class));
-                for (JsonNode result : json.get("results")) {
+                JsonNode jsonFromApi = objectMapper.readTree(restTemplate.getForObject(url, String.class));
+                jsonFromApi.get("results").forEach(result -> {
                     String title = result.get("title").asText();
                     String posterPath = result.get("poster_path").asText();
                     if (!movies.containsKey(title))
@@ -51,14 +55,15 @@ public class MovieDatabaseServiceImpl implements MovieDatabaseService {
                                 .title(title)
                                 .poster_path(posterPath)
                                 .build());
-                }
+                });
+
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
-        for (Map.Entry<String, Movie> entry : movies.entrySet()) {
-            moviesRepository.save(entry.getValue());
-        }
-        System.out.println("Parsing end");
+
+        moviesRepository.saveAll(movies.values());
+
+        logger.info("Parsing end.");
     }
 }

@@ -7,11 +7,10 @@ import java.util.List;
 public interface MoviesService {
     List<Movie> selectFilms(Integer offset);
 
-    String addMovieToFavourite(Long userId, Long movieId);
+    void addMovieToFavourite(Long userId, Long movieId);
 
-    String deleteMovieFromFavourite(Long userId, Long movieId);
+    void deleteMovieFromFavourite(Long userId, Long movieId);
 
-    List<Movie> showNoFavouritesSQL(Long userId);
-
-    List<Movie> showNoFavouritesInMemory(Long userId);
+    List<Movie> showNoFavourites(Long userId, String loaderType);
 }
+
